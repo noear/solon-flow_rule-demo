@@ -1,0 +1,59 @@
+id: rule
+nodes:
+  - id: "tax_setWagemore" #计算应纳税所得额
+    when: |
+      import java.time.LocalDate;
+      //2022-10-1 后生效
+      return cal.getWage() > 0 && LocalDate.now().compareTo(LocalDate.of(2022,10,1)) > 0;
+    task: |
+      double wagemore = cal.getWage() - 5000;
+      cal.setWagemore(wagemore);
+  - id: "tax_3000"  #设置税率、速算扣除数
+    when: "cal.getWagemore() <= 3000"
+    task: |
+      cal.setCess(0.03);//税率
+      cal.setPreminus(0);//速算扣除数
+  - id: "tax_12000"
+    when: "cal.getWagemore() > 3000 && cal.getWagemore() <= 12000"
+    task: |
+      cal.setCess(0.2);//税率
+      cal.setPreminus(210);//速算扣除数
+  - id: "tax_25000"
+    when: "cal.getWagemore() > 12000 && cal.getWagemore() <= 25000"
+    task: |
+      cal.setCess(0.2);
+      cal.setPreminus(1410);
+  - id: "tax_35000"
+    when: "cal.getWagemore() > 25000 && cal.getWagemore() <= 35000"
+    task: |
+      cal.setCess(0.25);
+      cal.setPreminus(2660);
+  - id: "tax_55000"
+    when: "cal.getWagemore() > 35000 && cal.getWagemore() <= 55000"
+    task: |
+      cal.setCess(0.25);
+      cal.setPreminus(2660);
+  - id: "tax_80000"
+    when: "cal.getWagemore() > 55000 && cal.getWagemore() <= 80000"
+    task: |
+      cal.setCess(0.35);
+      cal.setPreminus(7160);
+  - id: "tax_max"
+    when: "cal.getWagemore() > 80000"
+    task: |
+      cal.setCess(0.45);
+      cal.setPreminus(15160);
+  - id: "tax_result"
+    when: "cal.getWage() > 0 && cal.getWagemore() > 0 && cal.getCess() > 0"
+    task: |
+      //扣税额
+      double wageminus = cal.getWagemore() * cal.getCess() - cal.getPreminus();
+      double actualwage = cal.getWage() - wageminus;
+      cal.setWageminus(wageminus);
+      cal.setActualwage(actualwage);
+      System.out.println("--税前工资："+cal.getWage());
+      System.out.println("--应纳税所得额："+cal.getWagemore());
+      System.out.println("--税率：" + cal.getCess());
+      System.out.println("--速算扣除数：" + cal.getPreminus());
+      System.out.println("--扣税额：" + cal.getWageminus());
+      System.out.println("--税后工资：" + cal.getActualwage());
